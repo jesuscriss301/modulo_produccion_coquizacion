@@ -24,6 +24,7 @@ com\carboexco\produccionCoquizacion\entity\Deshorrne.class
 com\carboexco\produccionCoquizacion\repository\ProcesoBateriaRepository.class
 com\carboexco\produccionCoquizacion\controller\ApagadoController.class
 com\carboexco\produccionCoquizacion\entity\CantidadAsignacionId.class
+com\carboexco\produccionCoquizacion\controller\AsignacionController.class
 com\carboexco\produccionCoquizacion\entity\ProcesoBateria.class
 com\carboexco\produccionCoquizacion\repository\ProcesoCoquizacionRepository.class
 com\carboexco\produccionCoquizacion\entity\Novedad.class

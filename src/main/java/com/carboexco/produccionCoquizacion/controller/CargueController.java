@@ -45,7 +45,7 @@ public class CargueController {
 
         return cargueRepository.findById_IdUsuarioOrderByIdProceso_FechaDesc(idCargue);
     }
-    
+
     @PostMapping
     public ResponseEntity<Cargue> createCargue(@RequestBody Cargue cargue) {
         Cargue createdCargue = cargueRepository.save(cargue);

@@ -17,7 +17,7 @@ public class CantidadAsignacion implements Serializable {
 
     @Id
     @Column(name = "id", nullable = false)
-    private Long id;
+    private Integer id;
 
     @Column(name = "id_asignacion", nullable = false)
     private Integer idAsignacion;

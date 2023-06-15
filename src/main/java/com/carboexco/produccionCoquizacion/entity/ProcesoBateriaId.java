@@ -1,8 +1,10 @@
 package com.carboexco.produccionCoquizacion.entity;
 
 import jakarta.persistence.Column;
+import jakarta.persistence.ConstructorResult;
 import jakarta.persistence.Embeddable;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.Hibernate;
 
@@ -12,13 +14,19 @@ import java.util.Objects;
 @Getter
 @Setter
 @Embeddable
+@NoArgsConstructor
 public class ProcesoBateriaId implements Serializable {
     private static final long serialVersionUID = 1991692299509839360L;
     @Column(name = "id_proceso", nullable = false)
     private Integer idProceso;
 
     @Column(name = "id_horno", nullable = false)
-    private Integer idHorno;
+    private String idHorno;
+
+    public ProcesoBateriaId(String idHorno, Integer idProceso) {
+        this.idProceso=idProceso;
+        this.idHorno= idHorno;
+    }
 
     @Override
     public boolean equals(Object o) {

@@ -26,6 +26,11 @@ public class ProcesoControl implements Serializable {
     @Column(name = "id_control_pila", nullable = false)
     private Integer idControlPila;
 
+    public ProcesoControl(int idProceso, int idControlPila) {
+        this.idProceso=idProceso;
+        this.idControlPila=idControlPila;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

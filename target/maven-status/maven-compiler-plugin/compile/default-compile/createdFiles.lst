@@ -8,6 +8,7 @@ com\carboexco\produccionCoquizacion\entity\CantidadAsignacion.class
 com\carboexco\produccionCoquizacion\repository\NovedadRepository.class
 com\carboexco\produccionCoquizacion\repository\PropiedadCoqueRepository.class
 com\carboexco\produccionCoquizacion\controller\DeshorrneController.class
+com\carboexco\produccionCoquizacion\security\WebSecurityConfig.class
 com\carboexco\produccionCoquizacion\ProduccionCoquizacionAplication.class
 com\carboexco\produccionCoquizacion\controller\NovedadController.class
 com\carboexco\produccionCoquizacion\repository\CantidadAsignacionRepository.class

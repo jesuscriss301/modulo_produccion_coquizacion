@@ -20,75 +20,67 @@ public class TipoProcesoController {
 
     @Autowired
     private TipoProcesoRepository tipoProcesoRepository;
+    private final TokenValidationService authorizador = new TokenValidationService("");
 
     @GetMapping
     public List<TipoProceso> getAllTipoProcesos(@RequestHeader("Authorization") String bearerToken) {
-        int validacion = callValidateTokenEndpoint(bearerToken);
-        if (validacion == 200){
+        authorizador.setBearerToken(bearerToken);
+        if (authorizador.callValidateTokenEndpoint().getStatusCodeValue() == 200){
             return tipoProcesoRepository.findAll();
         }
         return Collections.emptyList();
     }
 
-    public int callValidateTokenEndpoint(@NotNull String bearerToken) {
-        RestTemplate restTemplate = new RestTemplate();
-
-        // Construye los encabezados de la solicitud HTTP
-        HttpHeaders headers = new HttpHeaders();
-        headers.set("Authorization", bearerToken);
-
-        // Realiza la llamada al endpoint /validate
-        HttpEntity<String> requestEntity = new HttpEntity<>(null, headers);
-        ResponseEntity<String> response = restTemplate.exchange(
-                "http://localhost:8084/validate",
-                HttpMethod.GET,
-                requestEntity,
-                String.class
-        );
-
-        // Obtiene la respuesta de la validación del token
-        String responseBody = response.getBody();
-        int statusCode = response.getStatusCodeValue();
-
-        return statusCode;
-    }
-
     @GetMapping("/{id}")
-    public TipoProceso getTipoProcesoById(@PathVariable int id) {
-
-        Optional<TipoProceso> tipoProceso = tipoProcesoRepository.findById(id);
-        return tipoProceso.orElse(null);
+    public TipoProceso getTipoProcesoById(@RequestHeader("Authorization") String bearerToken,@PathVariable int id) {
+        authorizador.setBearerToken(bearerToken);
+        if (authorizador.callValidateTokenEndpoint().getStatusCodeValue() == 200){
+            Optional<TipoProceso> tipoProceso = tipoProcesoRepository.findById(id);
+            return tipoProceso.orElse(null);
+        }
+        return null;
     }
 
     @PostMapping
-    public TipoProceso createTipoProceso(@RequestBody TipoProceso tipoProceso) {
-        return tipoProcesoRepository.save(tipoProceso);
+    public TipoProceso createTipoProceso(@RequestHeader("Authorization") String bearerToken,@RequestBody TipoProceso tipoProceso) {
+
+        authorizador.setBearerToken(bearerToken);
+        if (authorizador.callValidateTokenEndpoint().getStatusCodeValue() == 200){
+            return tipoProcesoRepository.save(tipoProceso);
+        }
+        return null;
+
+
     }
 
     @PutMapping("/{id}")
-    public TipoProceso updateTipoProceso(@PathVariable int id, @RequestBody TipoProceso tipoProceso) {
-        Optional<TipoProceso> tipoProcesoCurrent = tipoProcesoRepository.findById(id);
+    public TipoProceso updateTipoProceso(@RequestHeader("Authorization") String bearerToken, @PathVariable int id, @RequestBody TipoProceso tipoProceso) {
 
-        if (tipoProcesoCurrent.isPresent()) {
-            TipoProceso tipoProcesoToUpdate = tipoProcesoCurrent.get();
-            tipoProcesoToUpdate.setNombre(tipoProceso.getNombre());
+        authorizador.setBearerToken(bearerToken);
+        if (authorizador.callValidateTokenEndpoint().getStatusCodeValue() == 200) {
+            Optional<TipoProceso> tipoProcesoCurrent = tipoProcesoRepository.findById(id);
 
-            return tipoProcesoRepository.save(tipoProcesoToUpdate);
+            if (tipoProcesoCurrent.isPresent()) {
+                TipoProceso tipoProcesoToUpdate = tipoProcesoCurrent.get();
+                tipoProcesoToUpdate.setNombre(tipoProceso.getNombre());
+                return tipoProcesoRepository.save(tipoProcesoToUpdate);
+            }
         }
-
         return null;
     }
 
     @DeleteMapping("/{id}")
-    public TipoProceso deleteTipoProceso(@PathVariable int id) {
-        Optional<TipoProceso> tipoProceso = tipoProcesoRepository.findById(id);
+    public TipoProceso deleteTipoProceso(@RequestHeader("Authorization") String bearerToken, @PathVariable int id) {
+        authorizador.setBearerToken(bearerToken);
+        if (authorizador.callValidateTokenEndpoint().getStatusCodeValue() == 200){
+            Optional<TipoProceso> tipoProceso = tipoProcesoRepository.findById(id);
 
-        if (tipoProceso.isPresent()) {
-            TipoProceso tipoProcesoToDelete = tipoProceso.get();
-            tipoProcesoRepository.delete(tipoProcesoToDelete);
-            return tipoProcesoToDelete;
+            if (tipoProceso.isPresent()) {
+                TipoProceso tipoProcesoToDelete = tipoProceso.get();
+                tipoProcesoRepository.delete(tipoProcesoToDelete);
+                return tipoProcesoToDelete;
+            }
         }
-
         return null;
     }
 }

@@ -1,29 +1,46 @@
 package com.carboexco.produccionCoquizacion.security;
 
 import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
 
-import java.net.HttpURLConnection;
-import java.net.URL;
-
 @AllArgsConstructor
+@Data
 public class TokenValidationService {
 
-    private String token;
+    private String bearerToken;
     private final String validationUrl = "http://localhost:8084/validate";
 
-    public ResponseEntity<String> validateToken() {
-        RestTemplate restTemplate = new RestTemplate();
+    public ResponseEntity<String> callValidateTokenEndpoint() {
+        try {
+            RestTemplate restTemplate = new RestTemplate();
 
-        HttpHeaders headers = new HttpHeaders();
-        headers.set("Authorization", "Bearer " + token);
+            // Construye los encabezados de la solicitud HTTP
+            HttpHeaders headers = new HttpHeaders();
+            headers.set("Authorization", bearerToken);
 
-        // Puedes ajustar el tipo de solicitud (GET, POST, etc.) según tu necesidad
-        ResponseEntity<String> response = restTemplate.exchange(validationUrl, HttpMethod.GET, null, String.class);
+            // Realiza la llamada al endpoint /validate
+            HttpEntity<String> requestEntity = new HttpEntity<>(null, headers);
+            ResponseEntity<String> response = restTemplate.exchange(
+                    validationUrl,
+                    HttpMethod.GET,
+                    requestEntity,
+                    String.class
+            );
 
-        return response;
+            // Obtiene la respuesta de la validación del token
+            String responseBody = response.getBody();
+            int statusCode = response.getStatusCodeValue();
+
+            return response;
+        }catch (Exception e){
+            return null;
+        }
+
     }
 }

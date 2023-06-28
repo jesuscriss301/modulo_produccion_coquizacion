@@ -1,69 +1,94 @@
 package com.carboexco.produccionCoquizacion.controller;
-
 import com.carboexco.produccionCoquizacion.entity.Asignacion;
 import com.carboexco.produccionCoquizacion.repository.AsignacionRepository;
+import com.carboexco.produccionCoquizacion.security.TokenValidationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+
 @RestController
 @RequestMapping("/asignaciones")
 public class AsignacionController {
 
     @Autowired
     private AsignacionRepository asignacionRepository;
+    private final TokenValidationService authorizador = new TokenValidationService("");
 
     @GetMapping
-    public List<Asignacion> getAllAsignaciones() {
-        return asignacionRepository.findAll();
+    public List<Asignacion> getAllAsignaciones(@RequestHeader("Authorization") String bearerToken) {
+        authorizador.setBearerToken(bearerToken);
+        if (authorizador.callValidateTokenEndpoint().getStatusCodeValue() == 200) {
+            return asignacionRepository.findAll();
+        }
+        return Collections.emptyList();
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Asignacion> getAsignacionById(@PathVariable Integer id) {
-        Optional<Asignacion> asignacionOptional = asignacionRepository.findById(id);
+    public Asignacion getAsignacionById(
+            @RequestHeader("Authorization") String bearerToken,
+            @PathVariable Integer id) {
+        authorizador.setBearerToken(bearerToken);
+        if (authorizador.callValidateTokenEndpoint().getStatusCodeValue() == 200) {
+            Optional<Asignacion> asignacionOptional = asignacionRepository.findById(id);
 
-        if (asignacionOptional.isPresent()) {
-            Asignacion asignacion = asignacionOptional.get();
-            return ResponseEntity.ok(asignacion);
-        } else {
-            return ResponseEntity.notFound().build();
+            if (asignacionOptional.isPresent()) {
+                Asignacion asignacion = asignacionOptional.get();
+                return asignacion;
+            }
         }
+        return null;
     }
 
     @PostMapping
-    public ResponseEntity<Asignacion> createAsignacion(@RequestBody Asignacion asignacion) {
-        Asignacion createdAsignacion = asignacionRepository.save(asignacion);
-        return ResponseEntity.status(HttpStatus.CREATED).body(createdAsignacion);
+    public Asignacion createAsignacion(
+            @RequestHeader("Authorization") String bearerToken,
+            @RequestBody Asignacion asignacion) {
+        authorizador.setBearerToken(bearerToken);
+        if (authorizador.callValidateTokenEndpoint().getStatusCodeValue() == 200) {
+            Asignacion createdAsignacion = asignacionRepository.save(asignacion);
+            return createdAsignacion;
+        }
+        return null;
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Asignacion> updateAsignacion(@PathVariable Integer id, @RequestBody Asignacion asignacion) {
-        Optional<Asignacion> asignacionOptional = asignacionRepository.findById(id);
+    public Asignacion updateAsignacion(
+            @RequestHeader("Authorization") String bearerToken,
+            @PathVariable Integer id,
+            @RequestBody Asignacion asignacion) {
+        authorizador.setBearerToken(bearerToken);
+        if (authorizador.callValidateTokenEndpoint().getStatusCodeValue() == 200) {
+            Optional<Asignacion> asignacionOptional = asignacionRepository.findById(id);
 
-        if (asignacionOptional.isPresent()) {
-            Asignacion existingAsignacion = asignacionOptional.get();
-            // Actualizar los campos necesarios de existingAsignacion con los valores de asignacion recibidos en el body
+            if (asignacionOptional.isPresent()) {
+                Asignacion existingAsignacion = asignacionOptional.get();
+                // Actualizar los campos necesarios de existingAsignacion con los valores de asignacion recibidos en el body
 
-            Asignacion updatedAsignacion = asignacionRepository.save(existingAsignacion);
-            return ResponseEntity.ok(updatedAsignacion);
-        } else {
-            return ResponseEntity.notFound().build();
+                Asignacion updatedAsignacion = asignacionRepository.save(existingAsignacion);
+                return updatedAsignacion;
+            }
         }
+        return null;
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteAsignacion(@PathVariable Integer id) {
-        Optional<Asignacion> asignacionOptional = asignacionRepository.findById(id);
+    public Asignacion deleteAsignacion(
+            @RequestHeader("Authorization") String bearerToken,
+            @PathVariable Integer id) {
+        authorizador.setBearerToken(bearerToken);
+        if (authorizador.callValidateTokenEndpoint().getStatusCodeValue() == 200) {
+            Optional<Asignacion> asignacionOptional = asignacionRepository.findById(id);
 
-        if (asignacionOptional.isPresent()) {
-            asignacionRepository.deleteById(id);
-            return ResponseEntity.noContent().build();
-        } else {
-            return ResponseEntity.notFound().build();
+            if (asignacionOptional.isPresent()) {
+                asignacionRepository.deleteById(id);
+                return asignacionOptional.get();
+            }
         }
+        return null;
     }
 }
-

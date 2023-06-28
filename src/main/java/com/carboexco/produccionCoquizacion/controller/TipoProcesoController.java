@@ -1,15 +1,10 @@
 package com.carboexco.produccionCoquizacion.controller;
-
 import com.carboexco.produccionCoquizacion.entity.TipoProceso;
 import com.carboexco.produccionCoquizacion.repository.TipoProcesoRepository;
 import com.carboexco.produccionCoquizacion.security.TokenValidationService;
-import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.client.RestTemplate;
 
-import java.net.ConnectException;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -49,8 +44,6 @@ public class TipoProcesoController {
             return tipoProcesoRepository.save(tipoProceso);
         }
         return null;
-
-
     }
 
     @PutMapping("/{id}")

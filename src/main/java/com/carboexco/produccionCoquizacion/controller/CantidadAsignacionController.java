@@ -1,4 +1,5 @@
 package com.carboexco.produccionCoquizacion.controller;
+
 import com.carboexco.produccionCoquizacion.entity.CantidadAsignacion;
 import com.carboexco.produccionCoquizacion.repository.CantidadAsignacionRepository;
 import com.carboexco.produccionCoquizacion.security.TokenValidationService;
@@ -20,40 +21,45 @@ public class CantidadAsignacionController {
     private final TokenValidationService authorizador = new TokenValidationService("");
 
     @GetMapping
-    public List<CantidadAsignacion> getAllCantidadAsignaciones(@RequestHeader("Authorization") String bearerToken) {
+    public ResponseEntity<?> getAllCantidadAsignaciones(@RequestHeader("Authorization") String bearerToken) {
         authorizador.setBearerToken(bearerToken);
         if (authorizador.callValidateTokenEndpoint().getStatusCodeValue() == 200) {
-            return cantidadAsignacionRepository.findAll();
+            List<CantidadAsignacion> cantidadAsignacionList = cantidadAsignacionRepository.findAll();
+            return ResponseEntity.ok(cantidadAsignacionList);
+        } else {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build(); // Acceso no autorizado
         }
-        return Collections.emptyList();
     }
 
     @GetMapping("/{asignacion}/{tipoAsignacion}")
-    public List<CantidadAsignacion> getCantidadAsignacionById(
+    public ResponseEntity<?> getCantidadAsignacionById(
             @RequestHeader("Authorization") String bearerToken,
             @PathVariable Integer asignacion,
             @PathVariable Integer tipoAsignacion) {
         authorizador.setBearerToken(bearerToken);
         if (authorizador.callValidateTokenEndpoint().getStatusCodeValue() == 200) {
-            return cantidadAsignacionRepository.findByIdAsignacionAndIdTipoAsignacion(asignacion, tipoAsignacion);
+            List<CantidadAsignacion> cantidadAsignacionList = cantidadAsignacionRepository.findByIdAsignacionAndIdTipoAsignacion(asignacion, tipoAsignacion);
+            return ResponseEntity.ok(cantidadAsignacionList);
+        } else {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build(); // Acceso no autorizado
         }
-        return Collections.emptyList();
     }
 
     @PostMapping
-    public CantidadAsignacion createCantidadAsignacion(
+    public ResponseEntity<?> createCantidadAsignacion(
             @RequestHeader("Authorization") String bearerToken,
             @RequestBody CantidadAsignacion cantidadAsignacion) {
         authorizador.setBearerToken(bearerToken);
         if (authorizador.callValidateTokenEndpoint().getStatusCodeValue() == 200) {
             CantidadAsignacion createdCantidadAsignacion = cantidadAsignacionRepository.save(cantidadAsignacion);
-            return createdCantidadAsignacion;
+            return ResponseEntity.ok(createdCantidadAsignacion);
+        } else {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build(); // Acceso no autorizado
         }
-        return null;
     }
 
     @PutMapping("/{id}")
-    public CantidadAsignacion updateCantidadAsignacion(
+    public ResponseEntity<?> updateCantidadAsignacion(
             @RequestHeader("Authorization") String bearerToken,
             @PathVariable Integer id,
             @RequestBody CantidadAsignacion cantidadAsignacion) {
@@ -66,14 +72,17 @@ public class CantidadAsignacionController {
                 // Actualizar los campos necesarios de existingCantidadAsignacion con los valores de cantidadAsignacion recibidos en el body
 
                 CantidadAsignacion updatedCantidadAsignacion = cantidadAsignacionRepository.save(existingCantidadAsignacion);
-                return updatedCantidadAsignacion;
+                return ResponseEntity.ok(updatedCantidadAsignacion);
+            } else {
+                return ResponseEntity.notFound().build(); // ID no encontrado
             }
+        } else {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build(); // Acceso no autorizado
         }
-        return null;
     }
 
     @DeleteMapping("/{id}")
-    public CantidadAsignacion deleteCantidadAsignacion(
+    public ResponseEntity<?> deleteCantidadAsignacion(
             @RequestHeader("Authorization") String bearerToken,
             @PathVariable Integer id) {
         authorizador.setBearerToken(bearerToken);
@@ -82,9 +91,12 @@ public class CantidadAsignacionController {
 
             if (cantidadAsignacionOptional.isPresent()) {
                 cantidadAsignacionRepository.deleteById(id);
-                return cantidadAsignacionOptional.get();
+                return ResponseEntity.ok(cantidadAsignacionOptional.get());
+            } else {
+                return ResponseEntity.notFound().build(); // ID no encontrado
             }
+        } else {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build(); // Acceso no autorizado
         }
-        return null;
     }
 }

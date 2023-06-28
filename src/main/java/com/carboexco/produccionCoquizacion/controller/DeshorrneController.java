@@ -4,6 +4,8 @@ import com.carboexco.produccionCoquizacion.entity.Deshorrne;
 import com.carboexco.produccionCoquizacion.repository.DeshorrneRepository;
 import com.carboexco.produccionCoquizacion.security.TokenValidationService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Collections;
@@ -19,39 +21,45 @@ public class DeshorrneController {
     private final TokenValidationService authorizador = new TokenValidationService("");
 
     @GetMapping
-    public List<Deshorrne> getDeshorrneAll(@RequestHeader("Authorization") String bearerToken) {
+    public ResponseEntity<?> getDeshorrneAll(@RequestHeader("Authorization") String bearerToken) {
         authorizador.setBearerToken(bearerToken);
         if (authorizador.callValidateTokenEndpoint().getStatusCodeValue() == 200) {
-            return deshorrneRepository.findAll();
+            List<Deshorrne> deshorrneList = deshorrneRepository.findAll();
+            return ResponseEntity.ok(deshorrneList);
+        } else {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build(); // Acceso no autorizado
         }
-        return Collections.emptyList();
     }
 
     @GetMapping("/{id}")
-    public Deshorrne getDeshorrneById(@RequestHeader("Authorization") String bearerToken, @PathVariable int id) {
+    public ResponseEntity<?> getDeshorrneById(@RequestHeader("Authorization") String bearerToken, @PathVariable int id) {
         authorizador.setBearerToken(bearerToken);
         if (authorizador.callValidateTokenEndpoint().getStatusCodeValue() == 200) {
             Optional<Deshorrne> deshorrne = deshorrneRepository.findById(id);
 
             if (deshorrne.isPresent()) {
-                return deshorrne.get();
+                return ResponseEntity.ok(deshorrne.get());
+            } else {
+                return ResponseEntity.notFound().build(); // ID no encontrado
             }
+        } else {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build(); // Acceso no autorizado
         }
-        return null;
     }
 
     @PostMapping
-    public Deshorrne postDeshorrne(@RequestHeader("Authorization") String bearerToken, @RequestBody Deshorrne deshorrne) {
+    public ResponseEntity<?> postDeshorrne(@RequestHeader("Authorization") String bearerToken, @RequestBody Deshorrne deshorrne) {
         authorizador.setBearerToken(bearerToken);
         if (authorizador.callValidateTokenEndpoint().getStatusCodeValue() == 200) {
             deshorrneRepository.save(deshorrne);
-            return deshorrne;
+            return ResponseEntity.status(HttpStatus.CREATED).body(deshorrne);
+        } else {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build(); // Acceso no autorizado
         }
-        return null;
     }
 
     @PutMapping("/{id}")
-    public Deshorrne putDeshorrneById(@RequestHeader("Authorization") String bearerToken, @PathVariable int id, @RequestBody Deshorrne deshorrne) {
+    public ResponseEntity<?> putDeshorrneById(@RequestHeader("Authorization") String bearerToken, @PathVariable int id, @RequestBody Deshorrne deshorrne) {
         authorizador.setBearerToken(bearerToken);
         if (authorizador.callValidateTokenEndpoint().getStatusCodeValue() == 200) {
             Optional<Deshorrne> deshorrneCurrent = deshorrneRepository.findById(id);
@@ -67,24 +75,29 @@ public class DeshorrneController {
                 deshorrneReturn.setTonelajeCoque(deshorrne.getTonelajeCoque());
 
                 deshorrneRepository.save(deshorrneReturn);
-                return deshorrneReturn;
+                return ResponseEntity.ok(deshorrneReturn);
+            } else {
+                return ResponseEntity.notFound().build(); // ID no encontrado
             }
+        } else {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build(); // Acceso no autorizado
         }
-        return null;
     }
 
     @DeleteMapping("/{id}")
-    public Deshorrne deleteDeshorrneById(@RequestHeader("Authorization") String bearerToken, @PathVariable int id) {
+    public ResponseEntity<?> deleteDeshorrneById(@RequestHeader("Authorization") String bearerToken, @PathVariable int id) {
         authorizador.setBearerToken(bearerToken);
         if (authorizador.callValidateTokenEndpoint().getStatusCodeValue() == 200) {
             Optional<Deshorrne> deshorrne = deshorrneRepository.findById(id);
 
             if (deshorrne.isPresent()) {
-                Deshorrne deshorrneReturn = deshorrne.get();
                 deshorrneRepository.deleteById(id);
-                return deshorrneReturn;
+                return ResponseEntity.ok(deshorrne.get());
+            } else {
+                return ResponseEntity.notFound().build(); // ID no encontrado
             }
+        } else {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build(); // Acceso no autorizado
         }
-        return null;
     }
 }

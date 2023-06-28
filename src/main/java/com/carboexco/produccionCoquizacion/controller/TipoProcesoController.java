@@ -1,11 +1,13 @@
 package com.carboexco.produccionCoquizacion.controller;
+
 import com.carboexco.produccionCoquizacion.entity.TipoProceso;
 import com.carboexco.produccionCoquizacion.repository.TipoProcesoRepository;
 import com.carboexco.produccionCoquizacion.security.TokenValidationService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -18,62 +20,74 @@ public class TipoProcesoController {
     private final TokenValidationService authorizador = new TokenValidationService("");
 
     @GetMapping
-    public List<TipoProceso> getAllTipoProcesos(@RequestHeader("Authorization") String bearerToken) {
+    public ResponseEntity<?> getAllTipoProcesos(@RequestHeader("Authorization") String bearerToken) {
         authorizador.setBearerToken(bearerToken);
-        if (authorizador.callValidateTokenEndpoint().getStatusCodeValue() == 200){
-            return tipoProcesoRepository.findAll();
+        if (authorizador.callValidateTokenEndpoint().getStatusCodeValue() == 200) {
+            List<TipoProceso> tipoProcesos = tipoProcesoRepository.findAll();
+            return ResponseEntity.ok(tipoProcesos);
+        } else {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build(); // Acceso no autorizado
         }
-        return Collections.emptyList();
     }
 
     @GetMapping("/{id}")
-    public TipoProceso getTipoProcesoById(@RequestHeader("Authorization") String bearerToken,@PathVariable int id) {
+    public ResponseEntity<?> getTipoProcesoById(@RequestHeader("Authorization") String bearerToken, @PathVariable int id) {
         authorizador.setBearerToken(bearerToken);
-        if (authorizador.callValidateTokenEndpoint().getStatusCodeValue() == 200){
+        if (authorizador.callValidateTokenEndpoint().getStatusCodeValue() == 200) {
             Optional<TipoProceso> tipoProceso = tipoProcesoRepository.findById(id);
-            return tipoProceso.orElse(null);
+            if (tipoProceso.isPresent()) {
+                return ResponseEntity.ok(tipoProceso.get());
+            } else {
+                return ResponseEntity.notFound().build(); // ID no encontrado
+            }
+        } else {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build(); // Acceso no autorizado
         }
-        return null;
     }
 
     @PostMapping
-    public TipoProceso createTipoProceso(@RequestHeader("Authorization") String bearerToken,@RequestBody TipoProceso tipoProceso) {
-
+    public ResponseEntity<?> createTipoProceso(@RequestHeader("Authorization") String bearerToken, @RequestBody TipoProceso tipoProceso) {
         authorizador.setBearerToken(bearerToken);
-        if (authorizador.callValidateTokenEndpoint().getStatusCodeValue() == 200){
-            return tipoProcesoRepository.save(tipoProceso);
+        if (authorizador.callValidateTokenEndpoint().getStatusCodeValue() == 200) {
+            TipoProceso createdTipoProceso = tipoProcesoRepository.save(tipoProceso);
+            return ResponseEntity.status(HttpStatus.CREATED).body(createdTipoProceso);
+        } else {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build(); // Acceso no autorizado
         }
-        return null;
     }
 
     @PutMapping("/{id}")
-    public TipoProceso updateTipoProceso(@RequestHeader("Authorization") String bearerToken, @PathVariable int id, @RequestBody TipoProceso tipoProceso) {
-
+    public ResponseEntity<?> updateTipoProceso(@RequestHeader("Authorization") String bearerToken, @PathVariable int id, @RequestBody TipoProceso tipoProceso) {
         authorizador.setBearerToken(bearerToken);
         if (authorizador.callValidateTokenEndpoint().getStatusCodeValue() == 200) {
             Optional<TipoProceso> tipoProcesoCurrent = tipoProcesoRepository.findById(id);
-
             if (tipoProcesoCurrent.isPresent()) {
                 TipoProceso tipoProcesoToUpdate = tipoProcesoCurrent.get();
                 tipoProcesoToUpdate.setNombre(tipoProceso.getNombre());
-                return tipoProcesoRepository.save(tipoProcesoToUpdate);
+                TipoProceso updatedTipoProceso = tipoProcesoRepository.save(tipoProcesoToUpdate);
+                return ResponseEntity.ok(updatedTipoProceso);
+            } else {
+                return ResponseEntity.notFound().build(); // ID no encontrado
             }
+        } else {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build(); // Acceso no autorizado
         }
-        return null;
     }
 
     @DeleteMapping("/{id}")
-    public TipoProceso deleteTipoProceso(@RequestHeader("Authorization") String bearerToken, @PathVariable int id) {
+    public ResponseEntity<?> deleteTipoProceso(@RequestHeader("Authorization") String bearerToken, @PathVariable int id) {
         authorizador.setBearerToken(bearerToken);
-        if (authorizador.callValidateTokenEndpoint().getStatusCodeValue() == 200){
+        if (authorizador.callValidateTokenEndpoint().getStatusCodeValue() == 200) {
             Optional<TipoProceso> tipoProceso = tipoProcesoRepository.findById(id);
-
             if (tipoProceso.isPresent()) {
                 TipoProceso tipoProcesoToDelete = tipoProceso.get();
                 tipoProcesoRepository.delete(tipoProcesoToDelete);
-                return tipoProcesoToDelete;
+                return ResponseEntity.ok(tipoProcesoToDelete);
+            } else {
+                return ResponseEntity.notFound().build(); // ID no encontrado
             }
+        } else {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build(); // Acceso no autorizado
         }
-        return null;
     }
 }

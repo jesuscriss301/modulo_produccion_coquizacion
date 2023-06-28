@@ -1,9 +1,12 @@
 package com.carboexco.produccionCoquizacion.controller;
+
 import com.carboexco.produccionCoquizacion.entity.ProcesoBateria;
 import com.carboexco.produccionCoquizacion.entity.ProcesoBateriaId;
 import com.carboexco.produccionCoquizacion.repository.ProcesoBateriaRepository;
 import com.carboexco.produccionCoquizacion.security.TokenValidationService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Collections;
@@ -19,40 +22,46 @@ public class ProcesoBateriaController {
     private final TokenValidationService authorizador = new TokenValidationService("");
 
     @GetMapping
-    public List<ProcesoBateria> getProcesoBateriaAll(@RequestHeader("Authorization") String bearerToken) {
+    public ResponseEntity<?> getProcesoBateriaAll(@RequestHeader("Authorization") String bearerToken) {
         authorizador.setBearerToken(bearerToken);
         if (authorizador.callValidateTokenEndpoint().getStatusCodeValue() == 200) {
-            return procesoBateriaRepository.findAll();
+            List<ProcesoBateria> procesoBateriaList = procesoBateriaRepository.findAll();
+            return ResponseEntity.ok(procesoBateriaList);
+        } else {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build(); // Acceso no autorizado
         }
-        return Collections.emptyList();
     }
 
     @GetMapping("/{idBateria}/{idProceso}")
-    public ProcesoBateria getProcesoBateriaById(@RequestHeader("Authorization") String bearerToken, @PathVariable String idBateria, @PathVariable int idProceso) {
+    public ResponseEntity<?> getProcesoBateriaById(@RequestHeader("Authorization") String bearerToken, @PathVariable String idBateria, @PathVariable int idProceso) {
         authorizador.setBearerToken(bearerToken);
         if (authorizador.callValidateTokenEndpoint().getStatusCodeValue() == 200) {
             ProcesoBateriaId procesoBateriaId = new ProcesoBateriaId(idBateria, idProceso);
             Optional<ProcesoBateria> procesoBateria = procesoBateriaRepository.findById(procesoBateriaId);
 
             if (procesoBateria.isPresent()) {
-                return procesoBateria.get();
+                return ResponseEntity.ok(procesoBateria.get());
+            } else {
+                return ResponseEntity.notFound().build(); // ID no encontrado
             }
+        } else {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build(); // Acceso no autorizado
         }
-        return null;
     }
 
     @PostMapping
-    public ProcesoBateria postProcesoBateria(@RequestHeader("Authorization") String bearerToken, @RequestBody ProcesoBateria procesoBateria) {
+    public ResponseEntity<?> postProcesoBateria(@RequestHeader("Authorization") String bearerToken, @RequestBody ProcesoBateria procesoBateria) {
         authorizador.setBearerToken(bearerToken);
         if (authorizador.callValidateTokenEndpoint().getStatusCodeValue() == 200) {
             procesoBateriaRepository.save(procesoBateria);
-            return procesoBateria;
+            return ResponseEntity.status(HttpStatus.CREATED).body(procesoBateria);
+        } else {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build(); // Acceso no autorizado
         }
-        return null;
     }
 
     @PutMapping("/{idBateria}/{idProceso}")
-    public ProcesoBateria putProcesoBateriaById(@RequestHeader("Authorization") String bearerToken, @PathVariable String idBateria, @PathVariable int idProceso, @RequestBody ProcesoBateria procesoBateria) {
+    public ResponseEntity<?> putProcesoBateriaById(@RequestHeader("Authorization") String bearerToken, @PathVariable String idBateria, @PathVariable int idProceso, @RequestBody ProcesoBateria procesoBateria) {
         authorizador.setBearerToken(bearerToken);
         if (authorizador.callValidateTokenEndpoint().getStatusCodeValue() == 200) {
             ProcesoBateriaId procesoBateriaId = new ProcesoBateriaId(idBateria, idProceso);
@@ -63,25 +72,30 @@ public class ProcesoBateriaController {
                 procesoBateriaReturn.setTiempoCoquizacion(procesoBateria.getTiempoCoquizacion());
 
                 procesoBateriaRepository.save(procesoBateriaReturn);
-                return procesoBateriaReturn;
+                return ResponseEntity.ok(procesoBateriaReturn);
+            } else {
+                return ResponseEntity.notFound().build(); // ID no encontrado
             }
+        } else {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build(); // Acceso no autorizado
         }
-        return null;
     }
 
     @DeleteMapping("/{idBateria}/{idProceso}")
-    public ProcesoBateria deleteProcesoBateriaById(@RequestHeader("Authorization") String bearerToken, @PathVariable String idBateria, @PathVariable int idProceso) {
+    public ResponseEntity<?> deleteProcesoBateriaById(@RequestHeader("Authorization") String bearerToken, @PathVariable String idBateria, @PathVariable int idProceso) {
         authorizador.setBearerToken(bearerToken);
         if (authorizador.callValidateTokenEndpoint().getStatusCodeValue() == 200) {
             ProcesoBateriaId procesoBateriaId = new ProcesoBateriaId(idBateria, idProceso);
             Optional<ProcesoBateria> procesoBateria = procesoBateriaRepository.findById(procesoBateriaId);
 
             if (procesoBateria.isPresent()) {
-                ProcesoBateria procesoBateriaReturn = procesoBateria.get();
                 procesoBateriaRepository.deleteById(procesoBateriaId);
-                return procesoBateriaReturn;
+                return ResponseEntity.ok(procesoBateria.get());
+            } else {
+                return ResponseEntity.notFound().build(); // ID no encontrado
             }
+        } else {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build(); // Acceso no autorizado
         }
-        return null;
     }
 }

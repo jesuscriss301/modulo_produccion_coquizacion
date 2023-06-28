@@ -22,16 +22,18 @@ public class CargueController {
     private final TokenValidationService authorizador = new TokenValidationService("");
 
     @GetMapping
-    public List<Cargue> getAllCargues(@RequestHeader("Authorization") String bearerToken) {
+    public ResponseEntity<?> getAllCargues(@RequestHeader("Authorization") String bearerToken) {
         authorizador.setBearerToken(bearerToken);
         if (authorizador.callValidateTokenEndpoint().getStatusCodeValue() == 200) {
-            return cargueRepository.findAll();
+            List<Cargue> cargueList = cargueRepository.findAll();
+            return ResponseEntity.ok(cargueList);
+        } else {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build(); // Acceso no autorizado
         }
-        return Collections.emptyList();
     }
 
     @GetMapping("/{idCargue}/{idUsuario}")
-    public ResponseEntity<Cargue> getCargueById_IdCargueAndId_IdUsuarioOrderByIdProceso_FechaDesc(
+    public ResponseEntity<?> getCargueById_IdCargueAndId_IdUsuarioOrderByIdProceso_FechaDesc(
             @RequestHeader("Authorization") String bearerToken,
             @PathVariable Integer idCargue,
             @PathVariable Integer idUsuario) {
@@ -43,48 +45,54 @@ public class CargueController {
                 Cargue cargue = cargueOptional.get();
                 return ResponseEntity.ok(cargue);
             } else {
-                return ResponseEntity.notFound().build();
+                return ResponseEntity.notFound().build(); // ID no encontrado
             }
+        } else {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build(); // Acceso no autorizado
         }
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
     }
 
     @GetMapping("/{idCargue}")
-    public List<Cargue> getCargueById_IdCargueOrderByIdProceso_FechaAsc(
+    public ResponseEntity<?> getCargueById_IdCargueOrderByIdProceso_FechaAsc(
             @RequestHeader("Authorization") String bearerToken,
             @PathVariable Integer idCargue) {
         authorizador.setBearerToken(bearerToken);
         if (authorizador.callValidateTokenEndpoint().getStatusCodeValue() == 200) {
-            return cargueRepository.findById_IdCargueOrderByIdProceso_FechaAsc(idCargue);
+            List<Cargue> cargueList = cargueRepository.findById_IdCargueOrderByIdProceso_FechaAsc(idCargue);
+            return ResponseEntity.ok(cargueList);
+        } else {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build(); // Acceso no autorizado
         }
-        return Collections.emptyList();
     }
 
     @GetMapping("/{idUsuario}")
-    public List<Cargue> getCargueById_IdUsuarioOrderByIdProceso_FechaDesc(
+    public ResponseEntity<?> getCargueById_IdUsuarioOrderByIdProceso_FechaDesc(
             @RequestHeader("Authorization") String bearerToken,
             @PathVariable Integer idUsuario) {
         authorizador.setBearerToken(bearerToken);
         if (authorizador.callValidateTokenEndpoint().getStatusCodeValue() == 200) {
-            return cargueRepository.findById_IdUsuarioOrderByIdProceso_FechaDesc(idUsuario);
+            List<Cargue> cargueList = cargueRepository.findById_IdUsuarioOrderByIdProceso_FechaDesc(idUsuario);
+            return ResponseEntity.ok(cargueList);
+        } else {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build(); // Acceso no autorizado
         }
-        return Collections.emptyList();
     }
 
     @PostMapping
-    public Cargue createCargue(
+    public ResponseEntity<?> createCargue(
             @RequestHeader("Authorization") String bearerToken,
             @RequestBody Cargue cargue) {
         authorizador.setBearerToken(bearerToken);
         if (authorizador.callValidateTokenEndpoint().getStatusCodeValue() == 200) {
             Cargue createdCargue = cargueRepository.save(cargue);
-            return createdCargue;
+            return ResponseEntity.ok(createdCargue);
+        } else {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build(); // Acceso no autorizado
         }
-        return null;
     }
 
     @PutMapping("/{id}")
-    public Cargue updateCargue(
+    public ResponseEntity<?> updateCargue(
             @RequestHeader("Authorization") String bearerToken,
             @PathVariable CargueId id,
             @RequestBody Cargue cargue) {
@@ -97,16 +105,17 @@ public class CargueController {
                 // Actualizar los campos necesarios de existingCargue con los valores de cargue recibidos en el body
 
                 Cargue updatedCargue = cargueRepository.save(existingCargue);
-                return updatedCargue;
+                return ResponseEntity.ok(updatedCargue);
             } else {
-                return null;
+                return ResponseEntity.notFound().build(); // ID no encontrado
             }
+        } else {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build(); // Acceso no autorizado
         }
-        return null;
     }
 
     @DeleteMapping("/{id}")
-    public Cargue deleteCargue(
+    public ResponseEntity<?> deleteCargue(
             @RequestHeader("Authorization") String bearerToken,
             @PathVariable CargueId id) {
         authorizador.setBearerToken(bearerToken);
@@ -115,11 +124,12 @@ public class CargueController {
 
             if (cargueOptional.isPresent()) {
                 cargueRepository.deleteById(id);
-                return cargueOptional.get();
+                return ResponseEntity.ok(cargueOptional.get());
             } else {
-                return null;
+                return ResponseEntity.notFound().build(); // ID no encontrado
             }
+        } else {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build(); // Acceso no autorizado
         }
-        return null;
     }
 }

@@ -1,4 +1,5 @@
 package com.carboexco.produccionCoquizacion.controller;
+
 import com.carboexco.produccionCoquizacion.entity.Asignacion;
 import com.carboexco.produccionCoquizacion.repository.AsignacionRepository;
 import com.carboexco.produccionCoquizacion.security.TokenValidationService;
@@ -20,16 +21,18 @@ public class AsignacionController {
     private final TokenValidationService authorizador = new TokenValidationService("");
 
     @GetMapping
-    public List<Asignacion> getAllAsignaciones(@RequestHeader("Authorization") String bearerToken) {
+    public ResponseEntity<?> getAllAsignaciones(@RequestHeader("Authorization") String bearerToken) {
         authorizador.setBearerToken(bearerToken);
         if (authorizador.callValidateTokenEndpoint().getStatusCodeValue() == 200) {
-            return asignacionRepository.findAll();
+            List<Asignacion> asignacionList = asignacionRepository.findAll();
+            return ResponseEntity.ok(asignacionList);
+        } else {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build(); // Acceso no autorizado
         }
-        return Collections.emptyList();
     }
 
     @GetMapping("/{id}")
-    public Asignacion getAsignacionById(
+    public ResponseEntity<?> getAsignacionById(
             @RequestHeader("Authorization") String bearerToken,
             @PathVariable Integer id) {
         authorizador.setBearerToken(bearerToken);
@@ -38,26 +41,30 @@ public class AsignacionController {
 
             if (asignacionOptional.isPresent()) {
                 Asignacion asignacion = asignacionOptional.get();
-                return asignacion;
+                return ResponseEntity.ok(asignacion);
+            } else {
+                return ResponseEntity.notFound().build(); // ID no encontrado
             }
+        } else {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build(); // Acceso no autorizado
         }
-        return null;
     }
 
     @PostMapping
-    public Asignacion createAsignacion(
+    public ResponseEntity<?> createAsignacion(
             @RequestHeader("Authorization") String bearerToken,
             @RequestBody Asignacion asignacion) {
         authorizador.setBearerToken(bearerToken);
         if (authorizador.callValidateTokenEndpoint().getStatusCodeValue() == 200) {
             Asignacion createdAsignacion = asignacionRepository.save(asignacion);
-            return createdAsignacion;
+            return ResponseEntity.ok(createdAsignacion);
+        } else {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build(); // Acceso no autorizado
         }
-        return null;
     }
 
     @PutMapping("/{id}")
-    public Asignacion updateAsignacion(
+    public ResponseEntity<?> updateAsignacion(
             @RequestHeader("Authorization") String bearerToken,
             @PathVariable Integer id,
             @RequestBody Asignacion asignacion) {
@@ -70,14 +77,17 @@ public class AsignacionController {
                 // Actualizar los campos necesarios de existingAsignacion con los valores de asignacion recibidos en el body
 
                 Asignacion updatedAsignacion = asignacionRepository.save(existingAsignacion);
-                return updatedAsignacion;
+                return ResponseEntity.ok(updatedAsignacion);
+            } else {
+                return ResponseEntity.notFound().build(); // ID no encontrado
             }
+        } else {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build(); // Acceso no autorizado
         }
-        return null;
     }
 
     @DeleteMapping("/{id}")
-    public Asignacion deleteAsignacion(
+    public ResponseEntity<?> deleteAsignacion(
             @RequestHeader("Authorization") String bearerToken,
             @PathVariable Integer id) {
         authorizador.setBearerToken(bearerToken);
@@ -86,9 +96,12 @@ public class AsignacionController {
 
             if (asignacionOptional.isPresent()) {
                 asignacionRepository.deleteById(id);
-                return asignacionOptional.get();
+                return ResponseEntity.ok(asignacionOptional.get());
+            } else {
+                return ResponseEntity.notFound().build(); // ID no encontrado
             }
+        } else {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build(); // Acceso no autorizado
         }
-        return null;
     }
 }

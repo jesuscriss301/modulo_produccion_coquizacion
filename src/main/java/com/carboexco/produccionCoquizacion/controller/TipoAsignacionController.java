@@ -1,11 +1,13 @@
 package com.carboexco.produccionCoquizacion.controller;
+
 import com.carboexco.produccionCoquizacion.entity.TipoAsignacion;
 import com.carboexco.produccionCoquizacion.repository.TipoAsignacionRepository;
 import com.carboexco.produccionCoquizacion.security.TokenValidationService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -18,61 +20,74 @@ public class TipoAsignacionController {
     private final TokenValidationService authorizador = new TokenValidationService("");
 
     @GetMapping
-    public List<TipoAsignacion> getAllTipoAsignaciones(@RequestHeader("Authorization") String bearerToken) {
+    public ResponseEntity<?> getAllTipoAsignaciones(@RequestHeader("Authorization") String bearerToken) {
         authorizador.setBearerToken(bearerToken);
-        if (authorizador.callValidateTokenEndpoint().getStatusCodeValue() == 200){
-            return tipoAsignacionRepository.findAll();
+        if (authorizador.callValidateTokenEndpoint().getStatusCodeValue() == 200) {
+            List<TipoAsignacion> tipoAsignaciones = tipoAsignacionRepository.findAll();
+            return ResponseEntity.ok(tipoAsignaciones);
+        } else {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build(); // Acceso no autorizado
         }
-        return Collections.emptyList();
     }
 
     @GetMapping("/{id}")
-    public TipoAsignacion getTipoAsignacionById(@RequestHeader("Authorization") String bearerToken, @PathVariable int id) {
+    public ResponseEntity<?> getTipoAsignacionById(@RequestHeader("Authorization") String bearerToken, @PathVariable int id) {
         authorizador.setBearerToken(bearerToken);
-        if (authorizador.callValidateTokenEndpoint().getStatusCodeValue() == 200){
+        if (authorizador.callValidateTokenEndpoint().getStatusCodeValue() == 200) {
             Optional<TipoAsignacion> tipoAsignacion = tipoAsignacionRepository.findById(id);
-            return tipoAsignacion.orElse(null);
+            if (tipoAsignacion.isPresent()) {
+                return ResponseEntity.ok(tipoAsignacion.get());
+            } else {
+                return ResponseEntity.notFound().build(); // ID no encontrado
+            }
+        } else {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build(); // Acceso no autorizado
         }
-        return null;
     }
 
     @PostMapping
-    public TipoAsignacion createTipoAsignacion(@RequestHeader("Authorization") String bearerToken, @RequestBody TipoAsignacion tipoAsignacion) {
+    public ResponseEntity<?> createTipoAsignacion(@RequestHeader("Authorization") String bearerToken, @RequestBody TipoAsignacion tipoAsignacion) {
         authorizador.setBearerToken(bearerToken);
-        if (authorizador.callValidateTokenEndpoint().getStatusCodeValue() == 200){
-            return tipoAsignacionRepository.save(tipoAsignacion);
+        if (authorizador.callValidateTokenEndpoint().getStatusCodeValue() == 200) {
+            TipoAsignacion createdTipoAsignacion = tipoAsignacionRepository.save(tipoAsignacion);
+            return ResponseEntity.status(HttpStatus.CREATED).body(createdTipoAsignacion);
+        } else {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build(); // Acceso no autorizado
         }
-        return null;
     }
 
     @PutMapping("/{id}")
-    public TipoAsignacion updateTipoAsignacion(@RequestHeader("Authorization") String bearerToken, @PathVariable int id, @RequestBody TipoAsignacion tipoAsignacion) {
+    public ResponseEntity<?> updateTipoAsignacion(@RequestHeader("Authorization") String bearerToken, @PathVariable int id, @RequestBody TipoAsignacion tipoAsignacion) {
         authorizador.setBearerToken(bearerToken);
         if (authorizador.callValidateTokenEndpoint().getStatusCodeValue() == 200) {
             Optional<TipoAsignacion> tipoAsignacionCurrent = tipoAsignacionRepository.findById(id);
-
             if (tipoAsignacionCurrent.isPresent()) {
                 TipoAsignacion tipoAsignacionToUpdate = tipoAsignacionCurrent.get();
                 tipoAsignacionToUpdate.setTipoAsignacion(tipoAsignacion.getTipoAsignacion());
-
-                return tipoAsignacionRepository.save(tipoAsignacionToUpdate);
+                TipoAsignacion updatedTipoAsignacion = tipoAsignacionRepository.save(tipoAsignacionToUpdate);
+                return ResponseEntity.ok(updatedTipoAsignacion);
+            } else {
+                return ResponseEntity.notFound().build(); // ID no encontrado
             }
+        } else {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build(); // Acceso no autorizado
         }
-        return null;
     }
 
     @DeleteMapping("/{id}")
-    public TipoAsignacion deleteTipoAsignacion(@RequestHeader("Authorization") String bearerToken, @PathVariable int id) {
+    public ResponseEntity<?> deleteTipoAsignacion(@RequestHeader("Authorization") String bearerToken, @PathVariable int id) {
         authorizador.setBearerToken(bearerToken);
-        if (authorizador.callValidateTokenEndpoint().getStatusCodeValue() == 200){
+        if (authorizador.callValidateTokenEndpoint().getStatusCodeValue() == 200) {
             Optional<TipoAsignacion> tipoAsignacion = tipoAsignacionRepository.findById(id);
-
             if (tipoAsignacion.isPresent()) {
                 TipoAsignacion tipoAsignacionToDelete = tipoAsignacion.get();
                 tipoAsignacionRepository.delete(tipoAsignacionToDelete);
-                return tipoAsignacionToDelete;
+                return ResponseEntity.ok(tipoAsignacionToDelete);
+            } else {
+                return ResponseEntity.notFound().build(); // ID no encontrado
             }
+        } else {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build(); // Acceso no autorizado
         }
-        return null;
     }
 }

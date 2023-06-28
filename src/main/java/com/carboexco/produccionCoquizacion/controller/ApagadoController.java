@@ -1,4 +1,5 @@
 package com.carboexco.produccionCoquizacion.controller;
+
 import com.carboexco.produccionCoquizacion.entity.Apagado;
 import com.carboexco.produccionCoquizacion.repository.ApagadoRepository;
 import com.carboexco.produccionCoquizacion.security.TokenValidationService;
@@ -20,16 +21,18 @@ public class ApagadoController {
     private final TokenValidationService authorizador = new TokenValidationService("");
 
     @GetMapping
-    public List<Apagado> getAllApagados(@RequestHeader("Authorization") String bearerToken) {
+    public ResponseEntity<?> getAllApagados(@RequestHeader("Authorization") String bearerToken) {
         authorizador.setBearerToken(bearerToken);
         if (authorizador.callValidateTokenEndpoint().getStatusCodeValue() == 200) {
-            return apagadoRepository.findAll();
+            List<Apagado> apagadoList = apagadoRepository.findAll();
+            return ResponseEntity.ok(apagadoList);
+        } else {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build(); // Acceso no autorizado
         }
-        return Collections.emptyList();
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Apagado> getApagadoById(
+    public ResponseEntity<?> getApagadoById(
             @RequestHeader("Authorization") String bearerToken,
             @PathVariable Integer id) {
         authorizador.setBearerToken(bearerToken);
@@ -40,26 +43,28 @@ public class ApagadoController {
                 Apagado apagado = apagadoOptional.get();
                 return ResponseEntity.ok(apagado);
             } else {
-                return ResponseEntity.notFound().build();
+                return ResponseEntity.notFound().build(); // ID no encontrado
             }
+        } else {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build(); // Acceso no autorizado
         }
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
     }
 
     @PostMapping
-    public ResponseEntity<Apagado> createApagado(
+    public ResponseEntity<?> createApagado(
             @RequestHeader("Authorization") String bearerToken,
             @RequestBody Apagado apagado) {
         authorizador.setBearerToken(bearerToken);
         if (authorizador.callValidateTokenEndpoint().getStatusCodeValue() == 200) {
             Apagado createdApagado = apagadoRepository.save(apagado);
             return ResponseEntity.status(HttpStatus.CREATED).body(createdApagado);
+        } else {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build(); // Acceso no autorizado
         }
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
     }
 
     @PutMapping("/{id}")
-    public Apagado updateApagado(
+    public ResponseEntity<?> updateApagado(
             @RequestHeader("Authorization") String bearerToken,
             @PathVariable Integer id,
             @RequestBody Apagado apagado) {
@@ -72,14 +77,17 @@ public class ApagadoController {
                 // Actualizar los campos necesarios de existingApagado con los valores de apagado recibidos en el body
 
                 Apagado updatedApagado = apagadoRepository.save(existingApagado);
-                return updatedApagado;
+                return ResponseEntity.ok(updatedApagado);
+            } else {
+                return ResponseEntity.notFound().build(); // ID no encontrado
             }
+        } else {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build(); // Acceso no autorizado
         }
-        return null;
     }
 
     @DeleteMapping("/{id}")
-    public Apagado deleteApagado(
+    public ResponseEntity<?> deleteApagado(
             @RequestHeader("Authorization") String bearerToken,
             @PathVariable Integer id) {
         authorizador.setBearerToken(bearerToken);
@@ -88,9 +96,12 @@ public class ApagadoController {
 
             if (apagadoOptional.isPresent()) {
                 apagadoRepository.deleteById(id);
-                return apagadoOptional.get();
+                return ResponseEntity.ok(apagadoOptional.get());
+            } else {
+                return ResponseEntity.notFound().build(); // ID no encontrado
             }
+        } else {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build(); // Acceso no autorizado
         }
-        return null;
     }
 }

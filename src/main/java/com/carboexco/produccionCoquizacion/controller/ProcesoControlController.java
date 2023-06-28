@@ -1,8 +1,11 @@
 package com.carboexco.produccionCoquizacion.controller;
+
 import com.carboexco.produccionCoquizacion.entity.ProcesoControl;
 import com.carboexco.produccionCoquizacion.repository.ProcesoControlRepository;
 import com.carboexco.produccionCoquizacion.security.TokenValidationService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Collections;
@@ -18,39 +21,45 @@ public class ProcesoControlController {
     private final TokenValidationService authorizador = new TokenValidationService("");
 
     @GetMapping
-    public List<ProcesoControl> getProcesoControlAll(@RequestHeader("Authorization") String bearerToken) {
+    public ResponseEntity<?> getProcesoControlAll(@RequestHeader("Authorization") String bearerToken) {
         authorizador.setBearerToken(bearerToken);
         if (authorizador.callValidateTokenEndpoint().getStatusCodeValue() == 200) {
-            return procesoControlRepository.findAll();
+            List<ProcesoControl> procesoControlList = procesoControlRepository.findAll();
+            return ResponseEntity.ok(procesoControlList);
+        } else {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build(); // Acceso no autorizado
         }
-        return Collections.emptyList();
     }
 
     @GetMapping("/{idProceso}/{idControlPila}")
-    public ProcesoControl getProcesoControlById(@RequestHeader("Authorization") String bearerToken, @PathVariable int idProceso, @PathVariable int idControlPila) {
+    public ResponseEntity<?> getProcesoControlById(@RequestHeader("Authorization") String bearerToken, @PathVariable int idProceso, @PathVariable int idControlPila) {
         authorizador.setBearerToken(bearerToken);
         if (authorizador.callValidateTokenEndpoint().getStatusCodeValue() == 200) {
             ProcesoControl procesoControlId = new ProcesoControl(idProceso, idControlPila);
             Optional<ProcesoControl> procesoControl = procesoControlRepository.findFirstByIdProcesoAndIdControlPilaOrderByIdProcesoAsc(idProceso, idControlPila);
             if (procesoControl.isPresent()) {
-                return procesoControl.get();
+                return ResponseEntity.ok(procesoControl.get());
+            } else {
+                return ResponseEntity.notFound().build(); // ID no encontrado
             }
+        } else {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build(); // Acceso no autorizado
         }
-        return null;
     }
 
     @PostMapping
-    public ProcesoControl postProcesoControl(@RequestHeader("Authorization") String bearerToken, @RequestBody ProcesoControl procesoControl) {
+    public ResponseEntity<?> postProcesoControl(@RequestHeader("Authorization") String bearerToken, @RequestBody ProcesoControl procesoControl) {
         authorizador.setBearerToken(bearerToken);
         if (authorizador.callValidateTokenEndpoint().getStatusCodeValue() == 200) {
             procesoControlRepository.save(procesoControl);
-            return procesoControl;
+            return ResponseEntity.status(HttpStatus.CREATED).body(procesoControl);
+        } else {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build(); // Acceso no autorizado
         }
-        return null;
     }
 
     @PutMapping("/{idProceso}/{idControlPila}")
-    public ProcesoControl putProcesoControlById(@RequestHeader("Authorization") String bearerToken, @PathVariable int idProceso, @PathVariable int idControlPila, @RequestBody ProcesoControl procesoControl) {
+    public ResponseEntity<?> putProcesoControlById(@RequestHeader("Authorization") String bearerToken, @PathVariable int idProceso, @PathVariable int idControlPila, @RequestBody ProcesoControl procesoControl) {
         authorizador.setBearerToken(bearerToken);
         if (authorizador.callValidateTokenEndpoint().getStatusCodeValue() == 200) {
             ProcesoControl procesoControlId = new ProcesoControl(idProceso, idControlPila);
@@ -62,25 +71,30 @@ public class ProcesoControlController {
                 procesoControlReturn.setIdControlPila(procesoControl.getIdControlPila());
 
                 procesoControlRepository.save(procesoControlReturn);
-                return procesoControlReturn;
+                return ResponseEntity.ok(procesoControlReturn);
+            } else {
+                return ResponseEntity.notFound().build(); // ID no encontrado
             }
+        } else {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build(); // Acceso no autorizado
         }
-        return null;
     }
 
     @DeleteMapping("/{idProceso}/{idControlPila}")
-    public ProcesoControl deleteProcesoControlById(@RequestHeader("Authorization") String bearerToken, @PathVariable int idProceso, @PathVariable int idControlPila) {
+    public ResponseEntity<?> deleteProcesoControlById(@RequestHeader("Authorization") String bearerToken, @PathVariable int idProceso, @PathVariable int idControlPila) {
         authorizador.setBearerToken(bearerToken);
         if (authorizador.callValidateTokenEndpoint().getStatusCodeValue() == 200) {
             ProcesoControl procesoControlId = new ProcesoControl(idProceso, idControlPila);
             Optional<ProcesoControl> procesoControl = procesoControlRepository.findFirstByIdProcesoAndIdControlPilaOrderByIdProcesoAsc(idProceso, idControlPila);
 
             if (procesoControl.isPresent()) {
-                ProcesoControl procesoControlReturn = procesoControl.get();
                 procesoControlRepository.deleteByIdProcesoAndIdControlPila(idProceso, idControlPila);
-                return procesoControlReturn;
+                return ResponseEntity.ok(procesoControl.get());
+            } else {
+                return ResponseEntity.notFound().build(); // ID no encontrado
             }
+        } else {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build(); // Acceso no autorizado
         }
-        return null;
     }
 }

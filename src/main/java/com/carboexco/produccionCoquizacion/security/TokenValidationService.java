@@ -3,10 +3,7 @@ package com.carboexco.produccionCoquizacion.security;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.web.client.RestTemplate;
 
 @AllArgsConstructor
@@ -39,7 +36,7 @@ public class TokenValidationService {
 
             return response;
         }catch (Exception e){
-            return null;
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
 
     }

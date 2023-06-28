@@ -1,8 +1,11 @@
 package com.carboexco.produccionCoquizacion.controller;
+
 import com.carboexco.produccionCoquizacion.entity.Novedad;
 import com.carboexco.produccionCoquizacion.repository.NovedadRepository;
 import com.carboexco.produccionCoquizacion.security.TokenValidationService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Collections;
@@ -18,39 +21,45 @@ public class NovedadController {
     private final TokenValidationService authorizador = new TokenValidationService("");
 
     @GetMapping
-    public List<Novedad> getNovedadAll(@RequestHeader("Authorization") String bearerToken) {
+    public ResponseEntity<?> getNovedadAll(@RequestHeader("Authorization") String bearerToken) {
         authorizador.setBearerToken(bearerToken);
         if (authorizador.callValidateTokenEndpoint().getStatusCodeValue() == 200) {
-            return novedadRepository.findAll();
+            List<Novedad> novedadList = novedadRepository.findAll();
+            return ResponseEntity.ok(novedadList);
+        } else {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build(); // Acceso no autorizado
         }
-        return Collections.emptyList();
     }
 
     @GetMapping("/{id}")
-    public Novedad getNovedadById(@RequestHeader("Authorization") String bearerToken, @PathVariable int id) {
+    public ResponseEntity<?> getNovedadById(@RequestHeader("Authorization") String bearerToken, @PathVariable int id) {
         authorizador.setBearerToken(bearerToken);
         if (authorizador.callValidateTokenEndpoint().getStatusCodeValue() == 200) {
             Optional<Novedad> novedad = novedadRepository.findById(id);
 
             if (novedad.isPresent()) {
-                return novedad.get();
+                return ResponseEntity.ok(novedad.get());
+            } else {
+                return ResponseEntity.notFound().build(); // ID no encontrado
             }
+        } else {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build(); // Acceso no autorizado
         }
-        return null;
     }
 
     @PostMapping
-    public Novedad postNovedad(@RequestHeader("Authorization") String bearerToken, @RequestBody Novedad novedad) {
+    public ResponseEntity<?> postNovedad(@RequestHeader("Authorization") String bearerToken, @RequestBody Novedad novedad) {
         authorizador.setBearerToken(bearerToken);
         if (authorizador.callValidateTokenEndpoint().getStatusCodeValue() == 200) {
             novedadRepository.save(novedad);
-            return novedad;
+            return ResponseEntity.status(HttpStatus.CREATED).body(novedad);
+        } else {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build(); // Acceso no autorizado
         }
-        return null;
     }
 
     @PutMapping("/{id}")
-    public Novedad putNovedadById(@RequestHeader("Authorization") String bearerToken, @PathVariable int id, @RequestBody Novedad novedad) {
+    public ResponseEntity<?> putNovedadById(@RequestHeader("Authorization") String bearerToken, @PathVariable int id, @RequestBody Novedad novedad) {
         authorizador.setBearerToken(bearerToken);
         if (authorizador.callValidateTokenEndpoint().getStatusCodeValue() == 200) {
             Optional<Novedad> novedadCurrent = novedadRepository.findById(id);
@@ -65,24 +74,29 @@ public class NovedadController {
                 novedadReturn.setIdFotografia(novedad.getIdFotografia());
 
                 novedadRepository.save(novedadReturn);
-                return novedadReturn;
+                return ResponseEntity.ok(novedadReturn);
+            } else {
+                return ResponseEntity.notFound().build(); // ID no encontrado
             }
+        } else {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build(); // Acceso no autorizado
         }
-        return null;
     }
 
     @DeleteMapping("/{id}")
-    public Novedad deleteNovedadById(@RequestHeader("Authorization") String bearerToken, @PathVariable int id) {
+    public ResponseEntity<?> deleteNovedadById(@RequestHeader("Authorization") String bearerToken, @PathVariable int id) {
         authorizador.setBearerToken(bearerToken);
         if (authorizador.callValidateTokenEndpoint().getStatusCodeValue() == 200) {
             Optional<Novedad> novedad = novedadRepository.findById(id);
 
             if (novedad.isPresent()) {
-                Novedad novedadReturn = novedad.get();
                 novedadRepository.deleteById(id);
-                return novedadReturn;
+                return ResponseEntity.ok(novedad.get());
+            } else {
+                return ResponseEntity.notFound().build(); // ID no encontrado
             }
+        } else {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build(); // Acceso no autorizado
         }
-        return null;
     }
 }

@@ -1,6 +1,7 @@
 package com.carboexco.produccionCoquizacion.controller;
 
 import com.carboexco.produccionCoquizacion.entity.ProcesoCoquizacion;
+import com.carboexco.produccionCoquizacion.repository.ProcesoBateriaRepository;
 import com.carboexco.produccionCoquizacion.repository.ProcesoCoquizacionRepository;
 import com.carboexco.produccionCoquizacion.security.TokenValidationService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +19,8 @@ public class ProcesoCoquizacionController {
     @Autowired
     private ProcesoCoquizacionRepository procesoCoquizacionRepository;
     private final TokenValidationService authorizador = new TokenValidationService("");
+    @Autowired
+    private ProcesoBateriaRepository procesoBateriaRepository;
 
     @GetMapping
     public ResponseEntity<?> getAllProcesos(@RequestHeader("Authorization") String bearerToken) {
@@ -49,6 +52,9 @@ public class ProcesoCoquizacionController {
     public ResponseEntity<?> createProceso(@RequestHeader("Authorization") String bearerToken, @RequestBody ProcesoCoquizacion proceso) {
         authorizador.setBearerToken(bearerToken);
         if (authorizador.callValidateTokenEndpoint().getStatusCodeValue() == 200) {
+            String n = String.valueOf((int) (procesoCoquizacionRepository.countByFecha(proceso.getFecha())+1));
+            proceso.setIdPocesoCoquizacion(proceso.getIdPocesoCoquizacion() + "-" + n );
+            System.out.println(n);
             ProcesoCoquizacion createdProceso = procesoCoquizacionRepository.save(proceso);
             return ResponseEntity.status(HttpStatus.CREATED).body(createdProceso);
         } else {
@@ -63,7 +69,7 @@ public class ProcesoCoquizacionController {
             Optional<ProcesoCoquizacion> procesoCurrent = procesoCoquizacionRepository.findById(id);
             if (procesoCurrent.isPresent()) {
                 ProcesoCoquizacion procesoToUpdate = procesoCurrent.get();
-                procesoToUpdate.setIdIdTipoProceso(proceso.getIdIdTipoProceso());
+                procesoToUpdate.setIdTipoProceso(proceso.getIdTipoProceso());
                 procesoToUpdate.setIdProducto(proceso.getIdProducto());
                 procesoToUpdate.setFecha(proceso.getFecha());
                 ProcesoCoquizacion updatedProceso = procesoCoquizacionRepository.save(procesoToUpdate);

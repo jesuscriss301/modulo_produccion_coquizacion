@@ -4,26 +4,28 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 
 @Getter
 @Setter
 @Entity
 @Table(name = "proceso_coquizacion")
 public class ProcesoCoquizacion {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id_poceso_coquizacion", nullable = false)
-    private String id;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "id_id_tipo_proceso", nullable = false)
-    private TipoProceso idIdTipoProceso;
+
+    @Id
+    //@GeneratedValue(strategy = GenerationType.AUTO)
+    @Column(name = "id_poceso_coquizacion", nullable = false, length = 11)
+    private String idPocesoCoquizacion;
+
+    @ManyToOne()
+    @JoinColumn(name = "id_tipo_proceso", nullable = false)
+    private TipoProceso idTipoProceso;
 
     @Column(name = "id_producto")
     private Integer idProducto;
 
     @Column(name = "fecha", nullable = false)
-    private Date fecha;
+    private LocalDateTime fecha;
 
 }

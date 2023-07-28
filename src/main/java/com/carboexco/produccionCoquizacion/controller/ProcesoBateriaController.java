@@ -32,7 +32,7 @@ public class ProcesoBateriaController {
     }
 
     @GetMapping("/{idBateria}/{idProceso}")
-    public ResponseEntity<?> getProcesoBateriaById(@RequestHeader("Authorization") String bearerToken, @PathVariable String idBateria, @PathVariable int idProceso) {
+    public ResponseEntity<?> getProcesoBateriaById(@RequestHeader("Authorization") String bearerToken, @PathVariable String idBateria, @PathVariable String idProceso) {
         authorizador.setBearerToken(bearerToken);
         if (authorizador.callValidateTokenEndpoint().getStatusCodeValue() == 200) {
             ProcesoBateriaId procesoBateriaId = new ProcesoBateriaId(idBateria, idProceso);
@@ -60,7 +60,7 @@ public class ProcesoBateriaController {
     }
 
     @PutMapping("/{idBateria}/{idProceso}")
-    public ResponseEntity<?> putProcesoBateriaById(@RequestHeader("Authorization") String bearerToken, @PathVariable String idBateria, @PathVariable int idProceso, @RequestBody ProcesoBateria procesoBateria) {
+    public ResponseEntity<?> putProcesoBateriaById(@RequestHeader("Authorization") String bearerToken, @PathVariable String idBateria, @PathVariable String idProceso, @RequestBody ProcesoBateria procesoBateria) {
         authorizador.setBearerToken(bearerToken);
         if (authorizador.callValidateTokenEndpoint().getStatusCodeValue() == 200) {
             ProcesoBateriaId procesoBateriaId = new ProcesoBateriaId(idBateria, idProceso);
@@ -81,7 +81,7 @@ public class ProcesoBateriaController {
     }
 
     @DeleteMapping("/{idBateria}/{idProceso}")
-    public ResponseEntity<?> deleteProcesoBateriaById(@RequestHeader("Authorization") String bearerToken, @PathVariable String idBateria, @PathVariable int idProceso) {
+    public ResponseEntity<?> deleteProcesoBateriaById(@RequestHeader("Authorization") String bearerToken, @PathVariable String idBateria, @PathVariable String idProceso) {
         authorizador.setBearerToken(bearerToken);
         if (authorizador.callValidateTokenEndpoint().getStatusCodeValue() == 200) {
             ProcesoBateriaId procesoBateriaId = new ProcesoBateriaId(idBateria, idProceso);

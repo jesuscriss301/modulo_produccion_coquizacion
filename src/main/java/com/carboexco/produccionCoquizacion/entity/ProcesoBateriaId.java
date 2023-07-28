@@ -1,7 +1,6 @@
 package com.carboexco.produccionCoquizacion.entity;
 
 import jakarta.persistence.Column;
-import jakarta.persistence.ConstructorResult;
 import jakarta.persistence.Embeddable;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -18,12 +17,12 @@ import java.util.Objects;
 public class ProcesoBateriaId implements Serializable {
     private static final long serialVersionUID = 1991692299509839360L;
     @Column(name = "id_proceso", nullable = false)
-    private Integer idProceso;
+    private String idProceso;
 
     @Column(name = "id_horno", nullable = false)
     private String idHorno;
 
-    public ProcesoBateriaId(String idHorno, Integer idProceso) {
+    public ProcesoBateriaId(String idHorno, String idProceso) {
         this.idProceso=idProceso;
         this.idHorno= idHorno;
     }

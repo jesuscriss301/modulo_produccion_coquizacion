@@ -3,8 +3,6 @@ package com.carboexco.produccionCoquizacion.entity;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
-import org.hibernate.annotations.OnDelete;
-import org.hibernate.annotations.OnDeleteAction;
 
 import java.time.Instant;
 
@@ -24,11 +22,6 @@ public class Apagado {
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "id_proceso", nullable = false)
     private ProcesoCoquizacion idProceso;
-
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @OnDelete(action = OnDeleteAction.CASCADE)
-    @JoinColumn(name = "id_asignado", nullable = false)
-    private Asignacion idAsignado;
 
     @Column(name = "temperatura_inicial")
     private Integer temperaturaInicial;

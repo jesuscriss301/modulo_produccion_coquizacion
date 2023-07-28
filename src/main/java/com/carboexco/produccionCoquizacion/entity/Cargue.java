@@ -18,9 +18,6 @@ public class Cargue {
     @JoinColumn(name = "id_proceso", nullable = false)
     private ProcesoCoquizacion idProceso;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "id_asignado", nullable = false)
-    private Asignacion idAsignado;
 
     @Column(name = "id_control_pila", nullable = false)
     private Integer idControlPila;

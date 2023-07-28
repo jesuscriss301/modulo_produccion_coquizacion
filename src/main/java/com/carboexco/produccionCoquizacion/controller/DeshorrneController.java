@@ -66,7 +66,6 @@ public class DeshorrneController {
             if (deshorrneCurrent.isPresent()) {
                 Deshorrne deshorrneReturn = deshorrneCurrent.get();
 
-                deshorrneReturn.setIdAsignacion(deshorrne.getIdAsignacion());
                 deshorrneReturn.setIdProceso(deshorrne.getIdProceso());
                 deshorrneReturn.setIdPropiedades(deshorrne.getIdPropiedades());
                 deshorrneReturn.setFechaHoraInicio(deshorrne.getFechaHoraInicio());

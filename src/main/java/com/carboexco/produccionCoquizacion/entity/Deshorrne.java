@@ -17,10 +17,6 @@ public class Deshorrne {
     private Integer id;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "id_asignacion", nullable = false)
-    private Asignacion idAsignacion;
-
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "id_proceso", nullable = false)
     private ProcesoCoquizacion idProceso;
 

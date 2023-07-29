@@ -59,6 +59,18 @@ public class ProcesoBateriaController {
         }
     }
 
+    @PostMapping
+    public ResponseEntity<?> postListProcesoBateria(@RequestHeader("Authorization") String bearerToken, @RequestBody List<ProcesoBateria> procesoBateria) {
+        authorizador.setBearerToken(bearerToken);
+        if (authorizador.callValidateTokenEndpoint().getStatusCodeValue() == 200) {
+            // El token de autorización es válido, guardar los datos en la base de datos
+            List<ProcesoBateria> savedProcesoBateria = procesoBateriaRepository.saveAll(procesoBateria);
+            return ResponseEntity.status(HttpStatus.CREATED).body(savedProcesoBateria);
+        } else {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build(); // Acceso no autorizado
+        }
+    }
+
     @PutMapping("/{idBateria}/{idProceso}")
     public ResponseEntity<?> putProcesoBateriaById(@RequestHeader("Authorization") String bearerToken, @PathVariable String idBateria, @PathVariable String idProceso, @RequestBody ProcesoBateria procesoBateria) {
         authorizador.setBearerToken(bearerToken);

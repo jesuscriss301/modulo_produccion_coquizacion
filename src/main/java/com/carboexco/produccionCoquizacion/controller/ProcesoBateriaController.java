@@ -48,6 +48,7 @@ public class ProcesoBateriaController {
         }
     }
 
+
     @PostMapping
     public ResponseEntity<?> postProcesoBateria(@RequestHeader("Authorization") String bearerToken, @RequestBody ProcesoBateria procesoBateria) {
         authorizador.setBearerToken(bearerToken);
@@ -59,7 +60,8 @@ public class ProcesoBateriaController {
         }
     }
 
-    @PostMapping
+
+    @PostMapping("/")
     public ResponseEntity<?> postListProcesoBateria(@RequestHeader("Authorization") String bearerToken, @RequestBody List<ProcesoBateria> procesoBateria) {
         authorizador.setBearerToken(bearerToken);
         if (authorizador.callValidateTokenEndpoint().getStatusCodeValue() == 200) {

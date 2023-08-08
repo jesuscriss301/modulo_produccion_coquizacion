@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("/asignaciones_tipoasignacion")
+@RequestMapping("/asignaciones_tipo")
 public class AsignacionTipoAsignacionController {
 
     @Autowired
@@ -98,4 +98,3 @@ public class AsignacionTipoAsignacionController {
         }
     }
 }
-

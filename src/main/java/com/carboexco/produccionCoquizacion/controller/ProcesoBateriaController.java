@@ -47,7 +47,17 @@ public class ProcesoBateriaController {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build(); // Acceso no autorizado
         }
     }
+    @GetMapping("/{fecha}")
+    public ResponseEntity<?> getProcesoBateriaByFecha(@RequestHeader("Authorization") String bearerToken, @PathVariable String fecha) {
+        authorizador.setBearerToken(bearerToken);
+        if (authorizador.callValidateTokenEndpoint().getStatusCodeValue() == 200) {
+            List<ProcesoBateria> procesoBateria = procesoBateriaRepository.findById_IdProcesoStartsWith(fecha);
+            return ResponseEntity.ok(procesoBateria);
 
+        } else {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build(); // Acceso no autorizado
+        }
+    }
 
     @PostMapping
     public ResponseEntity<?> postProcesoBateria(@RequestHeader("Authorization") String bearerToken, @RequestBody ProcesoBateria procesoBateria) {

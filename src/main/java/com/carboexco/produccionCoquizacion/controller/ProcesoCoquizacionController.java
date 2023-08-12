@@ -48,6 +48,18 @@ public class ProcesoCoquizacionController {
         }
     }
 
+    @GetMapping("/byFecha/{fecha}")
+    public ResponseEntity<?> getProcesoCoquizacionByFecha(@RequestHeader("Authorization") String bearerToken, @PathVariable String fecha) {
+        authorizador.setBearerToken(bearerToken);
+        if (authorizador.callValidateTokenEndpoint().getStatusCodeValue() == 200) {
+            List<ProcesoCoquizacion> procesoCoquizacions = procesoCoquizacionRepository.findByIdPocesoCoquizacionStartsWithOrderByFechaAsc(fecha);
+            return ResponseEntity.ok(procesoCoquizacions);
+
+        } else {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build(); // Acceso no autorizado
+        }
+    }
+
     @PostMapping
     public ResponseEntity<?> createProceso(@RequestHeader("Authorization") String bearerToken, @RequestBody ProcesoCoquizacion proceso) {
         authorizador.setBearerToken(bearerToken);

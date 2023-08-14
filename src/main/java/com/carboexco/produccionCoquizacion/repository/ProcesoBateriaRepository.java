@@ -13,5 +13,7 @@ public interface ProcesoBateriaRepository extends JpaRepository<ProcesoBateria, 
     @Query("select p from ProcesoBateria p where p.id.idProceso like concat(?1, '%')")
     List<ProcesoBateria> findById_IdProcesoStartsWith(String idProceso);
 
+    @Query("select count(p) from ProcesoBateria p where p.id.idProceso like concat(?1, '%')")
+    long countById_IdProcesoStartsWith(String idProceso);
 
 }
